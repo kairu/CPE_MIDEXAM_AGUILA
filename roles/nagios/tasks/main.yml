@@ -1,0 +1,61 @@
+---
+# tasks file for nagios
+- name: Install required packages
+  apt:
+    name:
+      - gcc
+      - libgd-dev
+      - libgd3
+      - openssl
+      - libssl-dev
+      - libpng-dev
+      - build-essential
+      - automake
+      - autoconf
+    state: present
+    update_cache: yes
+    
+- name: Download Nagios Core
+  unarchive:
+    src: https://github.com/NagiosEnterprises/nagioscore/archive/nagios-4.4.6.tar.gz
+    dest: /tmp
+    remote_src: yes
+    
+- name: Configure and build Nagios
+  shell:
+    cmd: ./configure
+    chdir: /tmp/nagioscore-nagios-4.4.6
+    
+- name: Build Nagios
+  make:
+    chdir: /tmp/nagioscore-nagios-4.4.6
+    target: all
+    
+- name: Create nagios user and group
+  user:
+   name: nagios
+   create_home: yes
+   system: yes
+
+- name: Install Nagios
+  shell:
+    cmd: make install-commandmode
+    chdir: /tmp/nagioscore-nagios-4.4.6
+    
+- name: Install Nagios plugins
+  apt:
+    name: nagios-plugins
+    state: present
+    
+- name: Install Nagios init script
+  copy:
+    src: nagios.init
+    dest: /etc/init.d/nagios
+    mode: 0755
+    
+- name: Start and enable Nagios
+  service:
+    name: nagios
+    state: started
+    enabled: yes
+    use: service

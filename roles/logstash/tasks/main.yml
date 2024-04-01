@@ -1,0 +1,18 @@
+---
+- name: Install logstash
+  apt:
+    name: logstash
+    state: present
+    
+- name: Configure Logstash
+  template:
+    src: logstash.conf.j2
+    dest: /etc/logstash/conf.d/logstash.conf
+  notify:
+     - restart logstash
+     
+- name: Start and enable Logstash
+  systemd:
+    name: logstash
+    state: started
+    enabled: yes

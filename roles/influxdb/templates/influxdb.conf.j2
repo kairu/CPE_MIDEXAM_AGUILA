@@ -1,0 +1,16 @@
+[
+meta
+]
+  dir = "{{ influxdb_meta_dir }}"
+  
+[
+data
+]
+
+  dir = "{{ influxdb_data_dir }}"
+  index-version = "inmem"
+  
+[
+http
+]
+  bind-address = "{{ influxdb_http_bind_address }}"

@@ -1,0 +1,11 @@
+---
+# defaults file for kibana
+
+server_port: 5601
+server_host: 0.0.0.0
+server_name: kibana-test
+
+elasticsearch_host: http://localhost:9200
+
+kibana_username: username
+kibana_password: password

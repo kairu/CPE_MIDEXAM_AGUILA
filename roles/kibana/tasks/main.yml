@@ -1,0 +1,17 @@
+---
+# tasks file for kibana
+- name: Installing Kibana
+  apt:
+   name: kibana
+   
+- name: Replacing default kibana with updated file
+  template:
+    src: kibana.yml
+    dest: /etc/kibana/kibana.yml
+    
+- name: Start Kibana
+  systemd:
+    daemon_reload: true
+    name: kibana
+    state: started
+    enabled: yes

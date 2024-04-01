@@ -1,0 +1,69 @@
+---
+# tasks file for prometheus
+- name: Install required dependencies
+  apt:
+    name:
+      - wget
+    state: present
+    
+- name: Download Prometheus
+  unarchive:
+    src: https://github.com/prometheus/prometheus/releases/download/v{{ prometheus_version }}/prometheus-{{ prometheus_version }}.linux-amd64.tar.gz
+    dest: /tmp
+    remote_src: true
+    
+- name: Create Prometheus group
+  group:
+    name: prometheus
+    state: present
+    
+- name: Create Prometheus user
+  user:
+    name: prometheus
+    group: prometheus
+    shell: /usr/sbin/nologin
+    
+- name: Create Prometheus directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: prometheus
+    group: prometheus
+    mode: 0755
+  with_items:
+    - "{{ prometheus_data_dir }}"
+    - "{{ prometheus_config_dir }}"
+    
+- name: Copy Prometheus binaries
+  copy:
+    src: "/tmp/prometheus-{{ prometheus_version }}.linux-amd64/{{ item }}"
+    dest: "{{ prometheus_bin_dir }}/{{ item }}"
+    remote_src: true
+    owner: prometheus
+    group: prometheus
+    mode: 0755
+  with_items:
+    - prometheus
+    - promtool
+    
+- name: Configure Prometheus
+  template:
+    src: prometheus.yml.j2
+    dest: "{{ prometheus_config_dir }}/prometheus.yml"
+    owner: prometheus
+    group: prometheus
+    mode: 0644
+  notify: Restart Prometheus
+  
+- name: Copy Prometheus systemd unit file
+  template:
+    src: prometheus.service.j2
+    dest: /etc/systemd/system/prometheus.service
+    mode: 0644
+  notify: Reload systemd and Restart Prometheus
+  
+- name: Enable and start Prometheus service
+  systemd:
+    name: prometheus
+    enabled: true
+    state: started

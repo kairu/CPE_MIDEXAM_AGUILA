@@ -1,0 +1,66 @@
+#!/bin/bash
+. /lib/lsb/init-functions
+
+NAGIOS_HOME="/usr/local/nagios"
+NAGIOS_USER="nagios"
+NAGIOS_GROUP="nagios"
+NAGIOS_CONFIG="/usr/local/nagios/etc/nagios.cfg"
+NAGIOS_LOG="/usr/local/nagios/var/nagios.log"
+NAGIOS_LOCKFILE="/var/lock/subsys/nagios"
+
+NAGIOS_BIN="$NAGIOS_HOME/bin/nagios"
+
+NAGIOS_OPTS="-d $NAGIOS_CONFIG"
+
+start() {
+     log_daemon_msg "Starting Nagios Network Monitor"
+     start-stop-daemon --start --quiet --oknodo --chuid $NAGIOS_USER:$NAGIOS_GROUP --exec $NAGIOS_BIN -- $NAGIOS_OPTS > /dev/null
+     touch $NAGIOS_LOCKFILE
+     log_end_msg $?
+}
+
+stop() {
+     log_daemon_msg "Stopping Nagios Network Monitor"
+     start-stop-daemon --stop --quiet --oknodo --exec $NAGIOS_BIN
+     rm -f $NAGIOS_LOCKFILE
+     log_end_msg $?
+}
+
+reload() {
+     log_daemon_msg "Reload Nagios config"
+     start-stop-daemon --stop --signal HUP --quiet --oknodo --exec $NAGIOS_BIN
+     log_end_msg $?
+}
+
+restart() {
+     stop
+     start
+}
+
+status() {
+     status_of_proc -p $NAGIOS_LOCKFILE $NAGIOS_BIN $NAGIOS_OPTS && exit - || exit $?
+}
+
+case "$1" in
+     start)
+          start
+          ;;
+     stop)
+          stop
+          ;;
+     reload)
+          reload
+          ;;
+     restart)
+          restart
+          ;;
+     status)
+          status
+          ;;
+     *)
+          echo "Usage: $0 {start|stop|reload|restart|status}"
+          exit 1
+          ;;
+esac
+
+exit 0

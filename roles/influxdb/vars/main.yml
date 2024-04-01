@@ -1,0 +1,5 @@
+---
+# vars file for influxdb
+influxdb_meta_dir: /var/lib/influxdb/meta
+influxdb_data_dir: /var/lib/influxdb/data
+influxdb_http_bind_address: "0.0.0.0:8086"

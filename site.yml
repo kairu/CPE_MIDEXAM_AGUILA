@@ -1,0 +1,33 @@
+---
+- hosts: elasticsearch
+  become: true
+  vars:
+    elasticsearch_config_file: /etc/elasticsearch/elasticsearch.yml
+    node_roles_master_data: ["master", "data"]
+    node_roles_master: ["master"]
+    node_name_es01: "es01"
+    node_name_es02: "es02"
+  roles:
+    - elasticsearch
+    
+- hosts: kibana
+  become: true
+  roles:
+    - kibana
+    
+- hosts: logstash
+  become: true
+  roles:
+     - logstash
+     
+- hosts: nagios
+  become: true
+  roles:
+     - nagios
+     
+- hosts: monitoring_server
+  become: true
+  roles:
+     - grafana
+     - prometheus
+     - influxdb

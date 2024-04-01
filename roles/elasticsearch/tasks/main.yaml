@@ -1,0 +1,89 @@
+---
+- name: Update the server and install apt-transport-https package
+  apt:
+    name: apt-transport-https
+    update_cache: yes
+
+- name: Update package cache and fix missing dependencies
+  become: true
+  apt:
+    update_cache: yes
+    name: openjdk-11-jdk
+    state: present
+    force_apt_get: yes
+
+- name: Set JAVA_HOME Environment Variables
+  lineinfile:
+    path: /etc/environment
+    line: 'JAVA_HOME="/usr/lib/jvm/java-11-openjdk-amd64"'
+  environment:
+    PATH: "{{ ansible_env.PATH }}:/usr/lib/jvm/java-11-openjdk-amd64/bin"
+
+- name: Reload environment variables
+  become: true
+  shell: . /etc/environment
+
+- name: Verify JAVA_HOME environment variable
+  command: echo $JAVA_HOME
+
+- name: Add ElasticSearch GPG key
+  apt_key:
+    url: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+    state: present
+    keyring: /usr/share/keyrings/elasticsearch-keyring.gpg
+
+- name: Add ElasticSearch repository
+  become: true
+  become_method: sudo
+  shell: echo "deb [signed-by=/usr/share/keyrings/elasticsearch-keyring.gpg] https://artifacts.elastic.co/packages/8.x/apt stable main" | sudo tee /etc/apt/sources.list.d/elastic-8.x.list
+
+- name: Install ElasticSearch 8 on Ubuntu 20.04 LTS
+  apt:
+    update_cache: yes
+    name: elasticsearch
+    state: present
+
+- name: Generate Elasticsearch configuration file on es01
+  template:
+   src: elasticsearch.yml.j2
+   dest: "{{ elasticsearch_config_file }}"
+   owner: elasticsearch
+   group: elasticsearch
+   mode: '0644'
+  delegate_to: es01
+  vars:
+    node_roles: "{{ node_roles_master_data }}"
+    node_name: "{{ node_name_es01 }}"
+
+- name: Generate Elasticsearch configuration file on es02
+  template:
+    src: elasticsearch.yml.j2
+    dest: "{{ elasticsearch_config_file }}"
+    owner: elasticsearch
+    group: elasticsearch
+    mode: '0644'
+  delegate_to: es02
+  vars:
+    node_roles: "{{ node_roles_master }}"
+    node_name: "{{ node_name_es02 }}"
+
+- name: Start Elasticsearch service
+  service:
+    name: elasticsearch
+    state: started
+    enabled: yes
+        
+- name: Open required ports
+  ufw:
+    rule: allow
+    port: "{{ item }}"
+    proto: tcp
+  loop:
+    - "9200"
+    - "9300"
+    
+- name: Ensure UFW is enabled and running
+  service:
+     name: ufw
+     state: started
+     enabled: yes
