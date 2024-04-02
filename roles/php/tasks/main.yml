@@ -1,0 +1,11 @@
+---
+# tasks file for php
+- name: Install PHP
+  apt:
+    name:
+      - php
+      - libapache2-mod-php
+      - php-mysql
+    state: present
+    update_cache: yes
+  become: yes

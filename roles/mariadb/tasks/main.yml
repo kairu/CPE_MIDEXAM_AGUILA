@@ -1,0 +1,17 @@
+---
+# tasks file for mariadb
+- name: Install MariaDB
+  apt:
+    name:
+      - mariadb-server
+      - python3-pymysql
+    state: present
+    update_cache: yes
+  become: yes
+  
+- name: Ensure MariaDB is running and enabled
+  service:
+    name: mariadb
+    state: started
+    enabled: yes
+  become: yes

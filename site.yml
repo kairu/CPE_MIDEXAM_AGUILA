@@ -31,3 +31,10 @@
      - grafana
      - prometheus
      - influxdb
+     
+- hosts: web_server
+  become: true
+  roles:
+    - apache
+    - php
+    - mariadb

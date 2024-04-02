@@ -54,8 +54,4 @@
     mode: 0755
     
 - name: Start and enable Nagios
-  service:
-    name: nagios
-    state: started
-    enabled: yes
-    use: service
+  shell: /etc/init.d/nagios start

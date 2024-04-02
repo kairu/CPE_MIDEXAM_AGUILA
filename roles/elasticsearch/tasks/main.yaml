@@ -1,4 +1,16 @@
 ---
+- name: Install apt package dependencies
+  apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: yes
+  with_items:
+    - gpg-agent
+    - curl
+    - procps
+    - net-tools
+    - gnupg
+
 - name: Update the server and install apt-transport-https package
   apt:
     name: apt-transport-https

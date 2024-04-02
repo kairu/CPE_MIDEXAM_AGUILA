@@ -67,3 +67,10 @@
     name: prometheus
     enabled: true
     state: started
+    daemon-reload: true
+    
+- name: Open port 9090 for prometheus
+  ufw:
+    rule: allow
+    port: 9090
+    proto: tcp

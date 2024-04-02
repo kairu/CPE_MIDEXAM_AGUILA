@@ -1,0 +1,5 @@
+---
+# vars file for mariadb
+mysql_database: test_db
+mysql_user: admin
+mysql_password: admin

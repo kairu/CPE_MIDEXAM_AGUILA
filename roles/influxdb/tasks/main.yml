@@ -37,3 +37,4 @@
     name: influxdb
     enabled: true
     state: started
+    daemon-reload: true
